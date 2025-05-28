@@ -354,6 +354,10 @@ const WeatherPanelButton = GObject.registerClass(
             this._buttonBox.set_style_class_name(fillBackground ? "weather-button-box-filled" : "weather-button-box");
         }
 
+        _updateChildrenVisibility() {
+
+        }
+
         updateWeather(data, useFahrenheit) {
             const current = data.current_weather;
             const weatherCondition = WEATHER_CONDITIONS[current.weathercode] || {
@@ -573,6 +577,10 @@ export default class WeatherExtension extends Extension {
             () => this._updatePanelPosition()
         );
         this._settings.connect(
+            "changed::panel-index",
+            () => this._updatePanelPosition()
+        );
+        this._settings.connect(
             "changed::fill-button-background",
             () => this._updatePanelBackground()
         );
@@ -658,7 +666,8 @@ export default class WeatherExtension extends Extension {
 
 
             const position = this._settings.get_string('panel-position') || 'right';
-            Main.panel.addToStatusArea('weather-extension', this._panelButton, 0, position);
+	    const index = this._settings.get_int('panel-index') || 0;
+            Main.panel.addToStatusArea('weather-extension', this._panelButton, index, position);
         }
     }
 
@@ -669,6 +678,16 @@ export default class WeatherExtension extends Extension {
         if (this._panelButton) {
             const showBackground = this._settings.get_boolean("fill-button-background") || false;
             this._panelButton._updateBackground(showBackground);
+
+            this._panelButton._weatherLabel.ease({
+                opacity: showBackground ? 255 : 0,
+                duration: 200,
+                mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+                onComplete: () => {
+                    this._panelButton._updateChildrenVisibility();
+                },
+                width: showBackground ? 0 : -1,
+            });
         }
     }
 

@@ -2,6 +2,9 @@ import Adw from "gi://Adw";
 import Gtk from "gi://Gtk";
 import Gio from "gi://Gio";
 import GObject from "gi://GObject";
+
+import {PanelPage} from "./settings/PanelPage.js";
+
 import {
   ExtensionPreferences,
   gettext as _,
@@ -224,5 +227,8 @@ export default class WeatherPreferences extends ExtensionPreferences {
     page.add(positionGroup);
     page.add(styleGroup);
     window.add(page);
+
+    const panelPage = new PanelPage(settings);
+    window.add(panelPage);
   }
 }
